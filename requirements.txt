@@ -1,0 +1,4 @@
+git+https://github.com/codezjx/netease-cloud-music-dl
+python-telegram-bot
+
+socksio
