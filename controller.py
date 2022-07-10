@@ -69,9 +69,9 @@ def resolv_and_upload(update: Update, context: CallbackContext, song_id: int):
                     "unique_id": audio.audio.file_unique_id,
                     "duration": audio.audio.duration
                 }
-                print(repr(song2file))
-                print(audio.audio.file_id)
-                print(audio.audio.file_unique_id)
+                #print(repr(song2file))
+                #print(audio.audio.file_id)
+                #print(audio.audio.file_unique_id)
             with songLock:
                 for chat_id in downloadingSongs[str(song_id)]:
                     if chat_id == update.effective_chat.id:
