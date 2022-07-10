@@ -1,0 +1,73 @@
+import os
+from concurrent import futures
+from pathlib import Path
+from threading import Lock
+
+from ncm.api import CloudApi
+from telegram import Update, Document, Message, InputFile, Audio
+from telegram.ext import CallbackContext
+
+import util
+
+api = CloudApi()
+executor = futures.ThreadPoolExecutor(max_workers=5)
+cacheLock = Lock()
+
+songLock = Lock()
+downloadingSongs = dict[str, list[int]]()
+
+song2file = dict[str, Audio]()
+
+
+def download_and_send(update: Update, context: CallbackContext, song_id: str):
+    with cacheLock:
+        if song_id in song2file.keys():
+            context.bot.send_document(chat_id=update.effective_chat.id, document=song2file[song_id])
+        else:
+            with songLock:
+                started = song_id in downloadingSongs.keys()
+                if started:
+                    if update.effective_chat.id in downloadingSongs[song_id]:
+                        update.message.reply_text(text='Already downloading...')
+                        return
+                    else:
+                        downloadingSongs[song_id].append(update.effective_chat.id)
+                else:
+                    downloadingSongs[song_id] = list()
+                    downloadingSongs[song_id].append(update.effective_chat.id)
+                    executor.submit(resolv_and_upload, update, context, song_id)
+
+
+def resolv_and_upload(update: Update, context: CallbackContext, song_id: int):
+    if song_id not in downloadingSongs.keys():
+        print("Possibly downloaded song, skip this request.")
+        return
+    print(f'Found Song ID: {song_id}')
+    message = update.message.reply_text(text=f'Resolving...')
+    song_info = util.get_song_info_by_id(song_id)
+    if song_info:
+        message.edit_text(text=f'Downloading...')
+        result: os.path = util.download_song_by_song(song_info, message)
+        # message.edit_text(text=f'Downloaded! Uploading now...')
+        io = Path(result).open('rb')
+        try:
+            audio: Message = context.bot.send_audio(chat_id=update.effective_chat.id, audio=InputFile(io)
+                                                    , title=song_info['name']
+                                                    , performer=song_info['artists'][0]['name']
+                                                    ,
+                                                    filename=f"{song_info['artists'][0]['name']} ~ {song_info['name']}")
+            message.delete()
+            # broadcast
+            with cacheLock:
+                song2file[str(song_id)] = audio.audio
+            with songLock:
+                for chat_id in downloadingSongs[str(song_id)]:
+                    if chat_id == str(update.effective_chat.id):
+                        continue
+                    else:
+                        context.bot.send_audio(chat_id=chat_id, audio=audio.audio)
+        except Exception as e:
+            io.close()
+            message.edit_text(f'Download failed. Error: {e}')
+    else:
+        message.edit_text(text=f'Song not found.')
