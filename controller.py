@@ -33,7 +33,7 @@ def download_and_send(update: Update, context: CallbackContext, song_id: str, is
         started = song_id in downloadingSongs.keys()
         if started:
             if update.effective_chat.id in downloadingSongs[song_id]:
-                update.message.reply_text(text='Already downloading...')
+                update.message.reply_text(text='已经在下载了...')
                 return
             else:
                 downloadingSongs[song_id].append(update.effective_chat.id)
@@ -48,13 +48,18 @@ def resolv_and_upload(update: Update, context: CallbackContext, song_id: int, is
         print("Possibly downloaded song, skip this request.")
         return
     print(f'Found Song ID: {song_id}')
-    message = update.message.reply_text(text=f'Resolving...')
-    if is_program:
-        song_info = api.get_program(song_id)
-    else:
-        song_info = util.get_song_info_by_id(song_id)
+    message = update.message.reply_text(text=f'解析中...')
+    try:
+        if is_program:
+            song_info = api.get_program(song_id)
+        else:
+            song_info = util.get_song_info_by_id(song_id)
+    except Exception as e:
+        message.edit_text(f"无法获取歌曲信息！{e}")
+        del downloadingSongs[song_id]
+        return
     if song_info:
-        message.edit_text(text=f'Downloading...')
+        message.edit_text(text=f'下载中...')
         result: os.path = util.download_song_by_song(song_info, message, is_program)
         # message.edit_text(text=f'Downloaded! Uploading now...')
         io = Path(result).open('rb')
@@ -90,10 +95,10 @@ def resolv_and_upload(update: Update, context: CallbackContext, song_id: int, is
                 del downloadingSongs[str(song_id)]
         except Exception as e:
             io.close()
-            message.edit_text(f'Download failed. Error: {e}')
+            message.edit_text(f'下载失败. Error: {e}')
             del downloadingSongs[str(song_id)]
         cache_file: Path = Path(result)
         os.remove(cache_file)
     else:
-        message.edit_text(text=f'Song not found.')
+        message.edit_text(text=f'未找到曲目.')
         del downloadingSongs[str(song_id)]

@@ -33,24 +33,24 @@ def on_message(update: Update, context: CallbackContext):
 
 def command_ncm(update: Update, context: CallbackContext):
     if len(context.args) == 0:
-        update.message.reply_text("NCM Resolver v??\n" \
-                                  "/ncm <song_id> -- Resolve and send\n" \
-                                  "/ncm enable -- Detects NCM Links in chat and upload it\n" \
-                                  "/ncm disable -- Disable NCM Link detection in chat")
+        update.message.reply_text("网易云音乐 解析 v??\n" \
+                                  "/ncm <song_id> -- 下载音乐\n" \
+                                  "/ncm enable -- 启动链接检测\n" \
+                                  "/ncm disable -- 关闭检测")
         return
     sub_cmd = context.args[0]
     if sub_cmd == "enable":
         if update.effective_chat.id not in enabledGroups:
             enabledGroups.append(update.effective_chat.id)
-            update.message.reply_text("NCM Link detection is ENABLED")
+            update.message.reply_text("链接检测已启用")
         else:
-            update.message.reply_text("NCM Link detection is already enabled in this chat")
+            update.message.reply_text("链接检测早已启用")
     elif sub_cmd == "disable":
         if update.effective_chat.id in enabledGroups:
             enabledGroups.remove(update.effective_chat.id)
-            update.message.reply_text("NCM Link detection in this chat is DISABLED")
+            update.message.reply_text("链接检测已禁用")
         else:
-            update.message.reply_text("NCM Link detection is already disabled in this chat")
+            update.message.reply_text("链接检测未启用")
     else:
         song = controller.api.get_song(context.args[0])
         controller.download_and_send(update, context, context.args[0], song is None)
