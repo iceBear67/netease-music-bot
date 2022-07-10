@@ -52,7 +52,8 @@ def command_ncm(update: Update, context: CallbackContext):
         else:
             update.message.reply_text("NCM Link detection is already disabled in this chat")
     else:
-        controller.download_and_send(update, context, context.args[0])
+        song = controller.api.get_song(context.args[0])
+        controller.download_and_send(update, context, context.args[0], song is None)
 
 
 def load_data():
