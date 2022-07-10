@@ -19,3 +19,8 @@
 我不会写 Python，出了任何问题不关我事  
 
 此项目仅供交流学习使用，侵删
+
+# Credit
+
+[netease-cloud-music-dl](https://github.com/codezjx/netease-cloud-music-dl)  
+[python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)

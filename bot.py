@@ -24,10 +24,11 @@ def on_message(update: Update, context: CallbackContext):
     if not update.message.text.__contains__('music.163.com'):
         return
 
-    match_result = re.search(r'(song\?id=)(\d+)?', update.message.text)
+    match_result = re.search(r'(song|program)\?id=(\d+)?', update.message.text.lower())
     if match_result:
+        type: str = match_result.group(1)
         song_id: str = match_result.group(2)
-        controller.download_and_send(update, context, song_id)
+        controller.download_and_send(update, context, song_id, type == 'program')
 
 
 def command_ncm(update: Update, context: CallbackContext):

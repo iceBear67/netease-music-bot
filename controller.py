@@ -19,7 +19,7 @@ downloadingSongs = dict[str, list[int]]()
 song2file = dict[str, dict]()
 
 
-def download_and_send(update: Update, context: CallbackContext, song_id: str):
+def download_and_send(update: Update, context: CallbackContext, song_id: str, is_program: bool):
     with cacheLock:
         if song_id in song2file.keys():
             dct = song2file[song_id]
@@ -40,23 +40,33 @@ def download_and_send(update: Update, context: CallbackContext, song_id: str):
         else:
             downloadingSongs[song_id] = list()
             downloadingSongs[song_id].append(update.effective_chat.id)
-            executor.submit(resolv_and_upload, update, context, song_id)
+            executor.submit(resolv_and_upload, update, context, song_id, is_program)
 
 
-def resolv_and_upload(update: Update, context: CallbackContext, song_id: int):
+def resolv_and_upload(update: Update, context: CallbackContext, song_id: int, is_program: bool):
     if song_id not in downloadingSongs.keys():
         print("Possibly downloaded song, skip this request.")
         return
     print(f'Found Song ID: {song_id}')
     message = update.message.reply_text(text=f'Resolving...')
-    song_info = util.get_song_info_by_id(song_id)
+    if is_program:
+        song_info = api.get_program(song_id)
+    else:
+        song_info = util.get_song_info_by_id(song_id)
     if song_info:
         message.edit_text(text=f'Downloading...')
-        result: os.path = util.download_song_by_song(song_info, message)
+        result: os.path = util.download_song_by_song(song_info, message, is_program)
         # message.edit_text(text=f'Downloaded! Uploading now...')
         io = Path(result).open('rb')
         try:
-            audio: Message = context.bot.send_audio(chat_id=update.effective_chat.id, audio=InputFile(io)
+            if is_program:
+                audio: Message = context.bot.send_audio(chat_id=update.effective_chat.id, audio=InputFile(io)
+                                                        , title=song_info['name']
+                                                        , performer=song_info['dj']['nickname']
+                                                        ,
+                                                        filename=f"{song_info['dj']['nickname']} ~ {song_info['name']}")
+            else:
+                audio: Message = context.bot.send_audio(chat_id=update.effective_chat.id, audio=InputFile(io)
                                                     , title=song_info['name']
                                                     , performer=song_info['artists'][0]['name']
                                                     ,
@@ -69,9 +79,9 @@ def resolv_and_upload(update: Update, context: CallbackContext, song_id: int):
                     "unique_id": audio.audio.file_unique_id,
                     "duration": audio.audio.duration
                 }
-                #print(repr(song2file))
-                #print(audio.audio.file_id)
-                #print(audio.audio.file_unique_id)
+                # print(repr(song2file))
+                # print(audio.audio.file_id)
+                # print(audio.audio.file_unique_id)
             with songLock:
                 for chat_id in downloadingSongs[str(song_id)]:
                     if chat_id == update.effective_chat.id:
