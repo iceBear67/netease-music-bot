@@ -37,21 +37,21 @@ def command_ncm(update: Update, context: CallbackContext):
                                   "/ncm enable -- Detects NCM Links in chat and upload it\n" \
                                   "/ncm disable -- Disable NCM Link detection in chat")
         return
-    match context.args[0]:
-        case "enable":
-            if update.effective_chat.id not in enabledGroups:
-                enabledGroups.append(update.effective_chat.id)
-                update.message.reply_text("NCM Link detection is ENABLED")
-            else:
-                update.message.reply_text("NCM Link detection is already enabled in this chat")
-        case "disable":
-            if update.effective_chat.id in enabledGroups:
-                enabledGroups.remove(update.effective_chat.id)
-                update.message.reply_text("NCM Link detection in this chat is DISABLED")
-            else:
-                update.message.reply_text("NCM Link detection is already disabled in this chat")
-        case _:
-            controller.download_and_send(update, context, context.args[0])
+    sub_cmd = context.args[0]
+    if sub_cmd == "enable":
+        if update.effective_chat.id not in enabledGroups:
+            enabledGroups.append(update.effective_chat.id)
+            update.message.reply_text("NCM Link detection is ENABLED")
+        else:
+            update.message.reply_text("NCM Link detection is already enabled in this chat")
+    elif sub_cmd == "disable":
+        if update.effective_chat.id in enabledGroups:
+            enabledGroups.remove(update.effective_chat.id)
+            update.message.reply_text("NCM Link detection in this chat is DISABLED")
+        else:
+            update.message.reply_text("NCM Link detection is already disabled in this chat")
+    else:
+        controller.download_and_send(update, context, context.args[0])
 
 
 def load_data():

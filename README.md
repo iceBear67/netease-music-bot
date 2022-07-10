@@ -11,7 +11,7 @@
 
 # Setup
 
-修改 `config.py` 然后直接运行 `bot.py` 即可 (Python 3.10+)  
+修改 `config.py` 然后直接运行 `bot.py` 即可 (Python 3.9+)  
 要能连接到 Telegram & 网易云
 
 # Disclaimer
