@@ -107,6 +107,7 @@ class ProgressBar(object):
         self.prev_count = 0
         self.message = message
         self.total = total
+        self.fresh_interval = max(2 / (self.total / 1024),102400) # 1M at least
         self.end_str = '\r'
 
     def __get_info(self):
@@ -116,7 +117,7 @@ class ProgressBar(object):
     def refresh(self, count):
         self.count += count
         # Update progress if down size > 100k
-        if self.count - self.prev_count > 102400:
+        if self.count - self.prev_count > self.fresh_interval * 1024:
             self.prev_count = self.count
             self.message.edit_text(self.__get_info())
             # print(self.__get_info(), end=self.end_str)
