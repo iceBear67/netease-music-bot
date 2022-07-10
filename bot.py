@@ -7,6 +7,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 import re
 
+import config
 import controller
 import util
 
@@ -86,7 +87,7 @@ if __name__ == '__main__':
 
     # load data.
     load_data()
-    updater = Updater(token='5593989289:AAFOLjzoRLweCVOSXf3Subx1cZHfKkH6tro', use_context=True)
+    updater = Updater(token=config.bot_token, use_context=True)
     dispatcher: Dispatcher = updater.dispatcher
     echo_handler = MessageHandler(Filters.text & (~Filters.command), on_message)
     dispatcher.add_handler(echo_handler)
