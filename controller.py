@@ -82,7 +82,9 @@ def resolv_and_upload(update: Update, context: CallbackContext, song_id: int):
         except Exception as e:
             io.close()
             message.edit_text(f'Download failed. Error: {e}')
+            del downloadingSongs[str(song_id)]
         cache_file: Path = Path(result)
         os.remove(cache_file)
     else:
         message.edit_text(text=f'Song not found.')
+        del downloadingSongs[str(song_id)]
