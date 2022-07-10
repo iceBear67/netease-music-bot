@@ -116,9 +116,9 @@ class ProgressBar(object):
     def refresh(self, count):
         self.count += count
         # Update progress if down size > 20k
-        if (self.count - self.prev_count) > 20480:
+        if (self.count / self.total * 100) % 10 == 0:
             self.prev_count = self.count
-          #  self.message.edit_text(self.__get_info())
+            self.message.edit_text(self.__get_info())
             #print(self.__get_info(), end=self.end_str)
         # Finish downloading
         if self.count >= self.total:

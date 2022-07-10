@@ -26,7 +26,6 @@ def on_message(update: Update, context: CallbackContext):
     match_result = re.search(r'(song\?id=)(\d+)?', update.message.text)
     if match_result:
         song_id: str = match_result.group(2)
-        print(f'Song id found: {song_id}')
         controller.download_and_send(update, context, song_id)
 
 
@@ -59,17 +58,17 @@ def load_data():
     enable_group_file: Path = Path("enabled_groups.json")
     if not enable_group_file.exists():
         enable_group_file.write_text(json.dumps(list()))
-    cnf = enable_group_file.open('rb')
-    enabledGroups = json.loads(cnf.read())
-    cnf.close()
+    with enable_group_file.open('rb') as f:
+        global enabledGroups
+        enabledGroups = json.loads(f.read())
     print(f'{len(enabledGroups)} groups enabled')
     # load cache
     cache_file: Path = Path("cache.json")
     if not cache_file.exists():
         cache_file.write_text(json.dumps(controller.song2file))
-    cnf = cache_file.open('rb')
-    controller.song2file = json.load(cnf)
-    print(f'{len(controller.song2file.keys())} songs cached')
+    with cache_file.open('rb') as f:
+        controller.song2file = json.load(f)
+        print(f'{len(controller.song2file.keys())} songs cached')
 
 
 def save_data():
