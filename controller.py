@@ -67,10 +67,9 @@ def resolv_and_upload(update: Update, context: CallbackContext, song_id: int, is
                                                         filename=f"{song_info['dj']['nickname']} ~ {song_info['name']}")
             else:
                 audio: Message = context.bot.send_audio(chat_id=update.effective_chat.id, audio=InputFile(io)
-                                                    , title=song_info['name']
-                                                    , performer=song_info['artists'][0]['name']
-                                                    ,
-                                                    filename=f"{song_info['artists'][0]['name']} ~ {song_info['name']}")
+                                                        , title=song_info['name']
+                                                        , performer=song_info['artists'][0]['name'],
+                                                        filename=f"{song_info['artists'][0]['name']} ~ {song_info['name']}")
             message.delete()
             # broadcast
             with cacheLock:

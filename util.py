@@ -68,7 +68,7 @@ def download_song_by_song(song, message: Message, program: bool):
     if program:
         cover_url = song['coverUrl']
     else:
-        cover_url = song['album']['coverUrl']
+        cover_url = song['album']['blurPicUrl']
 
     if cover_url is None:
         if program:
