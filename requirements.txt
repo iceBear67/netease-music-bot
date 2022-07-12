@@ -1,4 +1,4 @@
-git+https://github.com/iceBear67/netease-cloud-music-dl
+git+https://github.com/codezjx/netease-cloud-music-dl
 python-telegram-bot
 
 socksio
